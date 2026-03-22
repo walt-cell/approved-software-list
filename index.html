@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approved Software List — GRC Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #f9fafb;
+    --border: #e2e5ea;
+    --border-strong: #c9cdd6;
+    --text-primary: #1a1f2e;
+    --text-secondary: #5a6278;
+    --text-muted: #8c93a8;
+    --accent: #1a56db;
+    --accent-light: #eef2ff;
+    --accent-hover: #1546b8;
+    --green: #057a55;
+    --green-bg: #def7ec;
+    --amber: #92400e;
+    --amber-bg: #fef3c7;
+    --red: #9b1c1c;
+    --red-bg: #fde8e8;
+    --blue: #1e429f;
+    --blue-bg: #e1effe;
+    --gray: #374151;
+    --gray-bg: #f3f4f6;
+    --orange: #92400e;
+    --orange-bg: #fff7ed;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--text-primary);
+    color: white;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-left { display: flex; align-items: center; gap: 20px; }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  }
+  .header-logo-icon {
+    width: 28px; height: 28px; background: var(--accent);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  }
+  .header-logo-icon svg { width: 15px; height: 15px; }
+  .header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+  .header-subtitle { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-badge {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7); font-size: 11px; padding: 3px 10px;
+    border-radius: 20px; font-family: var(--mono);
+  }
+  .header-user {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center;
+    justify-content: center; font-size: 12px; font-weight: 600; color: white;
+    cursor: pointer;
+  }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; height: calc(100vh - 60px); overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--surface);
+    border-right: 1px solid var(--border); padding: 20px 0;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 4px;
+  }
+  .sidebar-section { padding: 0 12px 12px; }
+  .sidebar-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--text-muted); text-transform: uppercase;
+    padding: 0 8px 8px;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: var(--radius);
+    color: var(--text-secondary); cursor: pointer; font-size: 13px;
+    transition: all 0.15s; text-decoration: none;
+  }
+  .sidebar-item:hover { background: var(--bg); color: var(--text-primary); }
+  .sidebar-item.active {
+    background: var(--accent-light); color: var(--accent); font-weight: 500;
+  }
+  .sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .sidebar-item.active svg { opacity: 1; }
+  .sidebar-count {
+    margin-left: auto; background: var(--border); color: var(--text-secondary);
+    font-size: 11px; padding: 1px 7px; border-radius: 10px; font-family: var(--mono);
+  }
+  .sidebar-item.active .sidebar-count { background: rgba(26,86,219,0.15); color: var(--accent); }
+
+  .sidebar-divider { height: 1px; background: var(--border); margin: 8px 12px; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; overflow-y: auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ── PAGE HEADER ── */
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); }
+  .page-title-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+  .page-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 16px; border-radius: var(--radius); font-size: 13px;
+    font-weight: 500; cursor: pointer; border: none; transition: all 0.15s;
+    font-family: var(--sans); white-space: nowrap;
+  }
+  .btn svg { width: 14px; height: 14px; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border-strong); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid transparent; }
+  .btn-ghost:hover { background: var(--bg); color: var(--text-primary); border-color: var(--border); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .summary-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+  }
+  .summary-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .summary-card.approved::before { background: #057a55; }
+  .summary-card.restricted::before { background: #d97706; }
+  .summary-card.prohibited::before { background: #dc2626; }
+  .summary-card.pending::before { background: #6366f1; }
+  .card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .card-value { font-size: 32px; font-weight: 600; font-family: var(--mono); margin: 8px 0 4px; letter-spacing: -0.03em; }
+  .summary-card.approved .card-value { color: #057a55; }
+  .summary-card.restricted .card-value { color: #d97706; }
+  .summary-card.prohibited .card-value { color: #dc2626; }
+  .summary-card.pending .card-value { color: #6366f1; }
+  .card-delta { font-size: 12px; color: var(--text-muted); }
+  .card-icon {
+    position: absolute; right: 16px; top: 20px;
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .summary-card.approved .card-icon { background: var(--green-bg); }
+  .summary-card.restricted .card-icon { background: var(--amber-bg); }
+  .summary-card.prohibited .card-icon { background: var(--red-bg); }
+  .summary-card.pending .card-icon { background: #ede9fe; }
+  .card-icon svg { width: 18px; height: 18px; }
+  .summary-card.approved .card-icon svg { color: #057a55; }
+  .summary-card.restricted .card-icon svg { color: #d97706; }
+  .summary-card.prohibited .card-icon svg { color: #dc2626; }
+  .summary-card.pending .card-icon svg { color: #6366f1; }
+
+  /* ── CHARTS ROW ── */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm);
+  }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
+  .chart-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px; }
+
+  /* Bar chart */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { width: 90px; font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
+  .bar-track { flex: 1; height: 10px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  .bar-val { width: 28px; font-size: 12px; font-family: var(--mono); color: var(--text-muted); text-align: right; }
+
+  /* Donut chart */
+  .donut-wrap { display: flex; align-items: center; gap: 24px; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-label { color: var(--text-secondary); }
+  .legend-val { font-family: var(--mono); font-weight: 500; margin-left: auto; padding-left: 12px; }
+
+  /* ── TABS ── */
+  .tabs-bar {
+    display: flex; gap: 2px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 4px; width: fit-content;
+  }
+  .tab-btn {
+    padding: 6px 16px; border-radius: 6px; font-size: 13px;
+    font-weight: 500; cursor: pointer; border: none; background: transparent;
+    color: var(--text-secondary); transition: all 0.15s; font-family: var(--sans);
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active { background: var(--text-primary); color: white; }
+  .tab-count {
+    display: inline-block; background: rgba(255,255,255,0.2);
+    font-size: 10px; padding: 0px 6px; border-radius: 10px;
+    margin-left: 5px; font-family: var(--mono);
+  }
+  .tab-btn:not(.active) .tab-count { background: var(--border); color: var(--text-muted); }
+
+  /* ── TABLE SECTION ── */
+  .table-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+  }
+  .table-toolbar {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 7px 12px; flex: 1; min-width: 200px;
+    transition: border-color 0.15s;
+  }
+  .search-box:focus-within { border-color: var(--accent); }
+  .search-box svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+  .search-box input {
+    border: none; background: transparent; font-size: 13px;
+    color: var(--text-primary); width: 100%; font-family: var(--sans);
+    outline: none;
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .filter-select {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 7px 12px;
+    font-size: 12px; color: var(--text-secondary); cursor: pointer;
+    font-family: var(--sans); outline: none; transition: border-color 0.15s;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead { background: var(--surface-2); }
+  th {
+    padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border); cursor: pointer;
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafbff; }
+  td { padding: 12px 14px; color: var(--text-primary); vertical-align: middle; }
+  .td-mono { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); }
+  .td-name { font-weight: 500; color: var(--text-primary); }
+  .td-muted { color: var(--text-muted); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .badge-approved { background: var(--green-bg); color: var(--green); }
+  .badge-approved .badge-dot { background: var(--green); }
+  .badge-restricted { background: var(--amber-bg); color: var(--amber); }
+  .badge-restricted .badge-dot { background: #d97706; }
+  .badge-prohibited { background: var(--red-bg); color: var(--red); }
+  .badge-prohibited .badge-dot { background: #dc2626; }
+  .badge-pending { background: #ede9fe; color: #5b21b6; }
+  .badge-pending .badge-dot { background: #7c3aed; }
+  .badge-low { background: var(--green-bg); color: var(--green); }
+  .badge-medium { background: var(--amber-bg); color: var(--amber); }
+  .badge-high { background: var(--red-bg); color: var(--red); }
+  .badge-completed { background: var(--blue-bg); color: var(--blue); }
+  .badge-overdue { background: var(--red-bg); color: var(--red); }
+  .badge-scheduled { background: var(--gray-bg); color: var(--gray); }
+
+  .warn-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; background: var(--amber-bg);
+    border-radius: 50%; margin-left: 4px; vertical-align: middle;
+  }
+  .warn-icon svg { width: 10px; height: 10px; color: #d97706; }
+
+  /* ── TABLE FOOTER ── */
+  .table-footer {
+    padding: 12px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface-2);
+  }
+  .table-info { font-size: 12px; color: var(--text-muted); }
+  .pagination { display: flex; gap: 4px; }
+  .page-btn {
+    width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer; color: var(--text-secondary); transition: all 0.1s;
+  }
+  .page-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .page-btn:hover:not(.active) { background: var(--bg); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,15,30,0.5);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+    padding: 32px; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius-lg);
+    width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+  }
+  .modal-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .modal-title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; color: var(--text-muted); font-size: 18px; transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--bg); color: var(--text-primary); }
+  .modal-body { padding: 24px; }
+  .modal-section { margin-bottom: 24px; }
+  .modal-section-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal-field-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 3px; }
+  .modal-field-value { font-size: 13px; color: var(--text-primary); font-weight: 400; }
+  .modal-field-value.mono { font-family: var(--mono); font-size: 12px; }
+  .modal-field-value.notes { color: var(--text-secondary); line-height: 1.6; }
+  .modal-footer {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+    background: var(--surface-2);
+  }
+
+  /* ── REVIEW LOG ── */
+  .log-entry {
+    display: flex; gap: 14px; padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-entry:hover { background: var(--surface-2); }
+  .log-dot-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 2px; }
+  .log-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .log-line { width: 1px; flex: 1; background: var(--border); margin-top: 4px; }
+  .log-entry:last-child .log-line { display: none; }
+  .log-content { flex: 1; }
+  .log-action { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .log-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .log-note { font-size: 12px; color: var(--text-secondary); margin-top: 6px; background: var(--bg); padding: 8px 10px; border-radius: 6px; border-left: 2px solid var(--border-strong); }
+  .log-date { font-size: 11px; color: var(--text-muted); font-family: var(--mono); white-space: nowrap; padding-top: 2px; }
+
+  /* content sections */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* requests table placeholder */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 60px 20px; gap: 12px;
+    color: var(--text-muted);
+  }
+  .empty-icon { width: 48px; height: 48px; background: var(--bg); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .empty-icon svg { width: 24px; height: 24px; }
+  .empty-label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+  .empty-sub { font-size: 12px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .main > * { animation: fadeIn 0.2s ease; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <div class="header-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="10" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="10" width="7" height="7" rx="1"/><rect x="10" y="10" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      Approved Software List
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-subtitle">GRC / Information Security Portal</div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge">v2.4.1</span>
+    <span class="header-badge">Last sync: 09:42 AM</span>
+    <div class="header-user" title="J. Rivera — Security Analyst">JR</div>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Navigation</div>
+    <a class="sidebar-item active" onclick="showTab('approved')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4M5 10a5 5 0 1010 0A5 5 0 005 10z"/></svg>
+      Approved Software
+      <span class="sidebar-count">47</span>
+    </a>
+    <a class="sidebar-item" onclick="showTab('restricted')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M7 10h6"/></svg>
+      Restricted Software
+      <span class="sidebar-count">12</span>
+    </a>
+    <a class="sidebar-item" onclick="showTab('prohibited')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M7 7l6 6M13 7l-6 6"/></svg>
+      Prohibited Software
+      <span class="sidebar-count">8</span>
+    </a>
+    <a class="sidebar-item" onclick="showTab('requests')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 4v12M4 10h12"/></svg>
+      Software Requests
+      <span class="sidebar-count">3</span>
+    </a>
+    <a class="sidebar-item" onclick="showTab('log')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h12M4 10h12M4 14h8"/></svg>
+      Security Review Log
+      <span class="sidebar-count">24</span>
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Filters</div>
+    <a class="sidebar-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-2M13 3h4v4M17 3l-7 7"/></svg>
+      Needs Review
+      <span class="sidebar-count">5</span>
+    </a>
+    <a class="sidebar-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4m0 0v4m0-4h4m-4 0H8"/></svg>
+      High Risk Items
+      <span class="sidebar-count">6</span>
+    </a>
+    <a class="sidebar-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M10 7v4l2 2"/></svg>
+      Expired Reviews
+      <span class="sidebar-count">4</span>
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Reports</div>
+    <a class="sidebar-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="12" height="12" rx="1"/><path d="M8 4v12M4 8h4"/></svg>
+      Audit Report
+    </a>
+    <a class="sidebar-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16l4-4 3 3 5-8"/></svg>
+      Risk Summary
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Software Inventory</div>
+      <div class="page-title-sub">Track approved, restricted, and prohibited software across the organization</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-ghost" onclick="loadFromSharePoint()" title="Refresh from SharePoint">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h5M16 16v-5h-5"/><path d="M20 10A10 10 0 104.93 4.93L4 4"/></svg>
+        Refresh
+      </button>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3v10M5 13l5 5 5-5"/><path d="M3 17h14"/></svg>
+        Export List
+      </button>
+      <button class="btn btn-primary" onclick="openModal('add')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+        Add Software
+      </button>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid">
+    <div class="summary-card approved">
+      <div class="card-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4M5 10a5 5 0 1010 0A5 5 0 005 10z"/></svg>
+      </div>
+      <div class="card-label">Approved Software</div>
+      <div class="card-value" id="count-approved">—</div>
+      <div class="card-delta">Live from SharePoint</div>
+    </div>
+    <div class="summary-card restricted">
+      <div class="card-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M7 10h6"/></svg>
+      </div>
+      <div class="card-label">Restricted Software</div>
+      <div class="card-value" id="count-restricted">—</div>
+      <div class="card-delta">Requires approval to use</div>
+    </div>
+    <div class="summary-card prohibited">
+      <div class="card-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M7 7l6 6M13 7l-6 6"/></svg>
+      </div>
+      <div class="card-label">Prohibited Software</div>
+      <div class="card-value" id="count-prohibited">—</div>
+      <div class="card-delta">Strictly prohibited in org</div>
+    </div>
+    <div class="summary-card pending">
+      <div class="card-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M10 7v4l2 2"/></svg>
+      </div>
+      <div class="card-label">Pending Review</div>
+      <div class="card-value" id="count-pending">—</div>
+      <div class="card-delta">Awaiting security review</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Software by Risk Level <span class="chart-subtitle">All entries</span></div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <span class="bar-label">Low Risk</span>
+          <div class="bar-track"><div class="bar-fill" style="width:67%;background:#057a55;"></div></div>
+          <span class="bar-val">33</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Medium Risk</span>
+          <div class="bar-track"><div class="bar-fill" style="width:43%;background:#d97706;"></div></div>
+          <span class="bar-val">21</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">High Risk</span>
+          <div class="bar-track"><div class="bar-fill" style="width:24%;background:#dc2626;"></div></div>
+          <span class="bar-val">12</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Unclassified</span>
+          <div class="bar-track"><div class="bar-fill" style="width:2%;background:#9ca3af;"></div></div>
+          <span class="bar-val">1</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Software by Category <span class="chart-subtitle">Distribution</span></div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110">
+          <!-- Donut segments hand-crafted for visual accuracy -->
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#e2e5ea" stroke-width="18"/>
+          <!-- Productivity 28% -->
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#1a56db" stroke-width="18"
+            stroke-dasharray="70.4 180.6" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
+          <!-- Security 22% -->
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#057a55" stroke-width="18"
+            stroke-dasharray="55.3 195.7" stroke-dashoffset="-70.4" transform="rotate(-90 55 55)"/>
+          <!-- Dev Tools 18% -->
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#7c3aed" stroke-width="18"
+            stroke-dasharray="45.2 205.8" stroke-dashoffset="-125.7" transform="rotate(-90 55 55)"/>
+          <!-- Infrastructure 16% -->
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#d97706" stroke-width="18"
+            stroke-dasharray="40.2 210.8" stroke-dashoffset="-170.9" transform="rotate(-90 55 55)"/>
+          <!-- Other 16% -->
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#9ca3af" stroke-width="18"
+            stroke-dasharray="40.1 210.9" stroke-dashoffset="-211.1" transform="rotate(-90 55 55)"/>
+          <text x="55" y="52" text-anchor="middle" font-size="16" font-weight="600" fill="#1a1f2e" font-family="IBM Plex Mono">67</text>
+          <text x="55" y="66" text-anchor="middle" font-size="9" fill="#8c93a8" font-family="IBM Plex Sans">entries</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#1a56db"></span><span class="legend-label">Productivity</span><span class="legend-val">19</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#057a55"></span><span class="legend-label">Security</span><span class="legend-val">15</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span><span class="legend-label">Dev Tools</span><span class="legend-val">12</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#d97706"></span><span class="legend-label">Infrastructure</span><span class="legend-val">11</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#9ca3af"></span><span class="legend-label">Other</span><span class="legend-val">10</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab(this,'tab-approved')">Approved <span class="tab-count" id="tab-count-approved">—</span></button>
+    <button class="tab-btn" onclick="switchTab(this,'tab-restricted')">Restricted <span class="tab-count" id="tab-count-restricted">—</span></button>
+    <button class="tab-btn" onclick="switchTab(this,'tab-prohibited')">Prohibited <span class="tab-count" id="tab-count-prohibited">—</span></button>
+    <button class="tab-btn" onclick="switchTab(this,'tab-requests')">Software Requests <span class="tab-count">3</span></button>
+    <button class="tab-btn" onclick="switchTab(this,'tab-log')">Security Review Log <span class="tab-count">24</span></button>
+  </div>
+
+  <!-- ====== TAB: APPROVED ====== -->
+  <div id="tab-approved" class="tab-content active">
+    <div class="table-section">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><path d="M13 13l4 4"/></svg>
+          <input type="text" id="searchInput" placeholder="Search by name or vendor…" oninput="filterTable()">
+        </div>
+        <select class="filter-select" id="filterStatus" onchange="filterTable()">
+          <option value="">All Statuses</option>
+          <option>Approved</option><option>Restricted</option><option>Prohibited</option><option>Pending Review</option>
+        </select>
+        <select class="filter-select" id="filterRisk" onchange="filterTable()">
+          <option value="">All Risk Levels</option>
+          <option>Low</option><option>Medium</option><option>High</option>
+        </select>
+        <select class="filter-select" id="filterType" onchange="filterTable()">
+          <option value="">All Types</option>
+          <option>SaaS</option><option>On-Premise</option><option>Open Source</option><option>Commercial</option>
+        </select>
+        <select class="filter-select" id="filterReview" onchange="filterTable()">
+          <option value="">All Review Statuses</option>
+          <option>Completed</option><option>Scheduled</option><option>Overdue</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('searchInput').value='';filterTable()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M6 6l8 8M14 6l-8 8"/></svg>
+          Clear
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="softwareTable">
+          <thead>
+            <tr>
+              <th>SW-ID</th>
+              <th>Software Name</th>
+              <th>Version</th>
+              <th>Vendor</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Business Owner</th>
+              <th>Technical Owner</th>
+              <th>Review Status</th>
+              <th>Risk Level</th>
+              <th>Approval Date</th>
+              <th>Last Review</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span class="table-info" id="tableInfo">Showing 8 of 8 entries</span>
+        <div class="pagination">
+          <div class="page-btn">‹</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: RESTRICTED ====== -->
+  <div id="tab-restricted" class="tab-content">
+    <div class="table-section">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);background:#fff8ed;display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#d97706" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 13v.5"/></svg>
+        <span style="font-size:12px;color:#92400e;font-weight:500;">Restricted software requires explicit manager approval and security acknowledgment before use. Usage must be logged in the risk register.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>SW-ID</th><th>Software Name</th><th>Vendor</th><th>Restriction Reason</th><th>Exception Required</th><th>Risk Level</th><th>Last Review</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr onclick="openModal('detail',{name:'TeamViewer',id:'SW-034',vendor:'TeamViewer GmbH',version:'15.x',status:'restricted',risk:'high',reason:'Remote access tool; requires VPN enforcement & logging'})">
+              <td class="td-mono">SW-034</td><td class="td-name">TeamViewer</td><td>TeamViewer GmbH</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Remote access; requires VPN enforcement</td>
+              <td><span class="badge badge-pending">Required</span></td>
+              <td><span class="badge badge-high"><span class="badge-dot"></span>High</span></td>
+              <td class="td-muted">2024-09-01</td>
+              <td><span class="badge badge-restricted"><span class="badge-dot"></span>Restricted</span></td>
+            </tr>
+            <tr onclick="openModal('detail',{name:'Dropbox',id:'SW-038',vendor:'Dropbox Inc.',version:'Any',status:'restricted',risk:'medium'})">
+              <td class="td-mono">SW-038</td><td class="td-name">Dropbox</td><td>Dropbox Inc.</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Unapproved cloud storage; DLP controls needed</td>
+              <td><span class="badge badge-pending">Required</span></td>
+              <td><span class="badge badge-medium"><span class="badge-dot"></span>Medium</span></td>
+              <td class="td-muted">2024-11-12</td>
+              <td><span class="badge badge-restricted"><span class="badge-dot"></span>Restricted</span></td>
+            </tr>
+            <tr>
+              <td class="td-mono">SW-041</td><td class="td-name">Zoom (Personal)</td><td>Zoom Video Communications</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Use enterprise license only; personal accounts prohibited</td>
+              <td><span class="badge badge-pending">Required</span></td>
+              <td><span class="badge badge-medium"><span class="badge-dot"></span>Medium</span></td>
+              <td class="td-muted">2025-01-20</td>
+              <td><span class="badge badge-restricted"><span class="badge-dot"></span>Restricted</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: PROHIBITED ====== -->
+  <div id="tab-prohibited" class="tab-content">
+    <div class="table-section">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);background:#fff1f1;display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 7l6 6M13 7l-6 6"/></svg>
+        <span style="font-size:12px;color:#9b1c1c;font-weight:500;">Prohibited software must not be installed or used on any company device or network. Violations are subject to disciplinary action per policy SEC-POL-004.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>SW-ID</th><th>Software Name</th><th>Vendor</th><th>Prohibition Reason</th><th>Risk Level</th><th>Date Added</th><th>Policy Ref</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="td-mono">SW-PRH-01</td><td class="td-name">uTorrent</td><td>BitTorrent Inc.</td>
+              <td style="font-size:12px;color:var(--text-secondary);">P2P file sharing; copyright & malware risk</td>
+              <td><span class="badge badge-high"><span class="badge-dot"></span>High</span></td>
+              <td class="td-muted">2022-03-01</td>
+              <td class="td-mono">SEC-POL-004</td>
+            </tr>
+            <tr>
+              <td class="td-mono">SW-PRH-02</td><td class="td-name">AnyDesk (Unauthorized)</td><td>AnyDesk Software GmbH</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Unapproved remote access; bypass security controls</td>
+              <td><span class="badge badge-high"><span class="badge-dot"></span>High</span></td>
+              <td class="td-muted">2023-06-15</td>
+              <td class="td-mono">SEC-POL-004</td>
+            </tr>
+            <tr>
+              <td class="td-mono">SW-PRH-03</td><td class="td-name">Hola VPN</td><td>Hola Networks</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Routes traffic through other users; data exposure</td>
+              <td><span class="badge badge-high"><span class="badge-dot"></span>High</span></td>
+              <td class="td-muted">2023-01-10</td>
+              <td class="td-mono">SEC-POL-004</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: REQUESTS ====== -->
+  <div id="tab-requests" class="tab-content">
+    <div class="table-section">
+      <div class="table-toolbar" style="justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="openModal('add')">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Submit Request
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Req-ID</th><th>Software Name</th><th>Requester</th><th>Department</th><th>Business Justification</th><th>Submitted</th><th>Review Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="td-mono">REQ-2025-031</td><td class="td-name">Notion</td><td>M. Chen</td><td>Product</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Team knowledge management and documentation</td>
+              <td class="td-muted">2025-03-12</td>
+              <td><span class="badge badge-pending">Under Review</span></td>
+            </tr>
+            <tr>
+              <td class="td-mono">REQ-2025-032</td><td class="td-name">Figma (Enterprise)</td><td>T. Adams</td><td>Design</td>
+              <td style="font-size:12px;color:var(--text-secondary);">UI/UX design tool; current license upgrade</td>
+              <td class="td-muted">2025-03-15</td>
+              <td><span class="badge badge-pending">Under Review</span></td>
+            </tr>
+            <tr>
+              <td class="td-mono">REQ-2025-033</td><td class="td-name">Datadog</td><td>L. Park</td><td>Engineering</td>
+              <td style="font-size:12px;color:var(--text-secondary);">Infrastructure observability and APM</td>
+              <td class="td-muted">2025-03-18</td>
+              <td><span class="badge badge-low" style="background:#ede9fe;color:#5b21b6;">Pending Info</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: REVIEW LOG ====== -->
+  <div id="tab-log" class="tab-content">
+    <div class="table-section">
+      <div class="table-toolbar">
+        <span style="font-size:13px;color:var(--text-secondary);font-weight:500;">Security Review Log — FY 2025</span>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M10 3v10M5 13l5 5 5-5"/></svg>
+          Export Log
+        </button>
+      </div>
+      <div>
+        <div class="log-entry">
+          <div class="log-dot-wrap"><div class="log-dot" style="background:#057a55"></div><div class="log-line"></div></div>
+          <div class="log-content">
+            <div class="log-action">Microsoft 365 — Annual Review Completed</div>
+            <div class="log-meta">Reviewed by: J. Rivera (Security) · Approved by: CISO</div>
+            <div class="log-note">No significant findings. Vendor security posture confirmed. Next review: Q1 2026. MFA enforcement validated.</div>
+          </div>
+          <div class="log-date">Mar 10, 2025</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-dot-wrap"><div class="log-dot" style="background:#dc2626"></div><div class="log-line"></div></div>
+          <div class="log-content">
+            <div class="log-action">TeamViewer — Risk Escalation: Status Changed to Restricted</div>
+            <div class="log-meta">Escalated by: A. Kumar (Security Analyst) · Reviewed by: Risk Committee</div>
+            <div class="log-note">Multiple unauthorized remote sessions detected. Moved to Restricted pending policy enforcement review. Exception process required for continued use.</div>
+          </div>
+          <div class="log-date">Feb 28, 2025</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-dot-wrap"><div class="log-dot" style="background:#057a55"></div><div class="log-line"></div></div>
+          <div class="log-content">
+            <div class="log-action">CrowdStrike Falcon — Security Review Completed</div>
+            <div class="log-meta">Reviewed by: Security Team · Approved by: VP Engineering</div>
+            <div class="log-note">Vendor SOC 2 Type II report reviewed. No critical CVEs. Approved for continued use. Review frequency maintained at semi-annual.</div>
+          </div>
+          <div class="log-date">Feb 20, 2025</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-dot-wrap"><div class="log-dot" style="background:#d97706"></div><div class="log-line"></div></div>
+          <div class="log-content">
+            <div class="log-action">Slack — Review Overdue — Reminder Issued</div>
+            <div class="log-meta">Notification sent to: T. Nakamura (Technical Owner)</div>
+            <div class="log-note">Annual review due Jan 31, 2025. Now 15 days overdue. Escalation scheduled if not completed within 7 days.</div>
+          </div>
+          <div class="log-date">Feb 15, 2025</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-dot-wrap"><div class="log-dot" style="background:#6366f1"></div><div class="log-line"></div></div>
+          <div class="log-content">
+            <div class="log-action">GitHub Enterprise — New Software Added to Approved List</div>
+            <div class="log-meta">Added by: J. Rivera · Business Owner: VP Engineering · Approval: CISO + CTO</div>
+            <div class="log-note">Initial security review completed. Vendor assessment: Passed. SSO and audit logging enabled. Annual review cycle initiated.</div>
+          </div>
+          <div class="log-date">Jan 22, 2025</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-dot-wrap"><div class="log-dot" style="background:#9ca3af"></div><div class="log-line"></div></div>
+          <div class="log-content">
+            <div class="log-action">Adobe Creative Suite — Vendor Risk Assessment Updated</div>
+            <div class="log-meta">Completed by: Vendor Risk Team</div>
+            <div class="log-note">Vendor risk re-assessed following Adobe's data processing agreement update. No change to risk rating. Low risk maintained.</div>
+          </div>
+          <div class="log-date">Jan 10, 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ====== MODAL ====== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Software Details</div>
+        <div class="modal-sub" id="modalSub">SW-001 — Full record view</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-secondary">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M11 5H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-5M18 2l-8 8M15 2h3v3"/></svg>
+        Edit Entry
+      </button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M10 3v10M5 13l5 5 5-5"/></svg>
+        Export Record
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SHAREPOINT CONFIG ──
+const SP_SITE = 'https://idemiapublicsecurity.sharepoint.com/sites/CybersecurityTeam';
+const SP_LIST = 'Approved Software List';
+const SP_API  = `${SP_SITE}/_api/web/lists/getbytitle('${encodeURIComponent(SP_LIST)}')/items?$top=500&$orderby=Id desc`;
+
+let softwareData = [];
+
+// Map SharePoint field names → internal field names
+function mapItem(item) {
+  return {
+    id:           item.SoftwareID      || `SW-${String(item.Id).padStart(3,'0')}`,
+    name:         item.Title           || '—',
+    version:      item.Version         || '—',
+    vendor:       item.Vendor          || '—',
+    type:         item.SoftwareType    || '—',
+    category:     item.Category        || '—',
+    bizOwner:     item.BusinessOwner   || '—',
+    techOwner:    item.TechnicalOwner  || '—',
+    reviewStatus: item.SecurityReviewStatus || 'Scheduled',
+    risk:         (item.RiskLevel      || 'low').toLowerCase(),
+    approvalDate: item.ApprovalDate    ? item.ApprovalDate.substring(0,10) : '—',
+    lastReview:   item.LastReviewDate  ? item.LastReviewDate.substring(0,10) : '—',
+    status:       (item.Status         || 'pending review').toLowerCase(),
+    notes:        item.Notes           || '—',
+    dataClass:    item.DataClassification || '—',
+    privilege:    item.PrivilegeRequirement || '—',
+    internet:     item.InternetAccess  || '—',
+    network:      item.NetworkBehavior || '—',
+    patching:     item.PatchingMethod  || '—',
+    vulnStatus:   item.VulnerabilityStatus || '—',
+    vendorRisk:   item.VendorRiskAssessment || '—',
+    vendorSecurity: item.VendorSecurityStatus || '—',
+    approvalAuth: item.ApprovalAuthority || '—',
+    reviewFreq:   item.ReviewFrequency || '—',
+    exception:    item.ExceptionRequired || 'No',
+    exceptionId:  item.ExceptionID     || '—',
+  };
+}
+
+// Update summary cards from live data
+function updateSummaryCards(data) {
+  const counts = { approved:0, restricted:0, prohibited:0, pending:0 };
+  data.forEach(sw => {
+    if (sw.status === 'approved') counts.approved++;
+    else if (sw.status === 'restricted') counts.restricted++;
+    else if (sw.status === 'prohibited') counts.prohibited++;
+    else counts.pending++;
+  });
+  document.getElementById('count-approved').textContent    = counts.approved;
+  document.getElementById('count-restricted').textContent  = counts.restricted;
+  document.getElementById('count-prohibited').textContent  = counts.prohibited;
+  document.getElementById('count-pending').textContent     = counts.pending;
+  // Update tab counts
+  document.getElementById('tab-count-approved').textContent   = counts.approved;
+  document.getElementById('tab-count-restricted').textContent = counts.restricted;
+  document.getElementById('tab-count-prohibited').textContent = counts.prohibited;
+}
+
+// Fetch from SharePoint REST API
+async function loadFromSharePoint() {
+  showLoadingState();
+  try {
+    const res = await fetch(SP_API, {
+      headers: { 'Accept': 'application/json;odata=nometadata' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    softwareData = (json.value || []).map(mapItem);
+    updateSummaryCards(softwareData);
+    renderTable(softwareData);
+    hideLoadingState();
+  } catch(err) {
+    showErrorState(err);
+  }
+}
+
+function showLoadingState() {
+  document.getElementById('tableBody').innerHTML = `
+    <tr><td colspan="14" style="text-align:center;padding:48px;color:var(--text-muted);">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+        <span style="font-size:13px">Loading from SharePoint…</span>
+      </div>
+    </td></tr>`;
+}
+
+function hideLoadingState() { /* table is re-rendered by renderTable */ }
+
+function showErrorState(err) {
+  document.getElementById('tableBody').innerHTML = `
+    <tr><td colspan="14" style="text-align:center;padding:48px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;background:var(--red-bg);border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 13v.5"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary)">Could not load SharePoint data</div>
+        <div style="font-size:12px;color:var(--text-muted);max-width:360px;text-align:center">
+          Make sure you are signed into SharePoint in this browser and that the list exists.<br>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${err.message}</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:4px" onclick="loadFromSharePoint()">Try again</button>
+      </div>
+    </td></tr>`;
+}
+
+// ── RENDER TABLE ──
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  data.forEach(sw => {
+    const isOverdue = sw.reviewStatus === 'Overdue';
+    const row = document.createElement('tr');
+    row.onclick = () => openModal('detail', sw);
+    row.innerHTML = `
+      <td class="td-mono">${sw.id}</td>
+      <td class="td-name">${sw.name}${isOverdue ? `<span class="warn-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6v4M10 13v.5"/><circle cx="10" cy="10" r="7"/></svg></span>` : ''}</td>
+      <td class="td-muted">${sw.version}</td>
+      <td>${sw.vendor}</td>
+      <td><span style="font-size:11px;color:var(--text-secondary)">${sw.type}</span></td>
+      <td><span style="font-size:11px;color:var(--text-secondary)">${sw.category}</span></td>
+      <td class="td-muted" style="font-size:12px">${sw.bizOwner}</td>
+      <td class="td-muted" style="font-size:12px">${sw.techOwner}</td>
+      <td>${reviewBadge(sw.reviewStatus)}</td>
+      <td>${riskBadge(sw.risk)}</td>
+      <td class="td-mono">${sw.approvalDate}</td>
+      <td class="td-mono" style="${isOverdue?'color:#dc2626;font-weight:500':''}">${sw.lastReview}</td>
+      <td>${statusBadge(sw.status)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('detail',softwareData.find(s=>s.id==='${sw.id}'))">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();">Edit</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+  document.getElementById('tableInfo').textContent = `Showing ${data.length} of ${softwareData.length} entries`;
+}
+
+function statusBadge(s){
+  const map={approved:'badge-approved',restricted:'badge-restricted',prohibited:'badge-prohibited','pending review':'badge-pending'};
+  const cls=map[s]||'badge-pending';
+  return `<span class="badge ${cls}"><span class="badge-dot"></span>${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+}
+function riskBadge(r){
+  const map={low:'badge-low',medium:'badge-medium',high:'badge-high'};
+  return `<span class="badge ${map[r]||'badge-low'}"><span class="badge-dot"></span>${r.charAt(0).toUpperCase()+r.slice(1)}</span>`;
+}
+function reviewBadge(r){
+  const map={Completed:'badge-completed',Overdue:'badge-overdue',Scheduled:'badge-scheduled'};
+  return `<span class="badge ${map[r]||'badge-scheduled'}">${r}</span>`;
+}
+
+// ── FILTER ──
+function filterTable(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('filterStatus').value.toLowerCase();
+  const risk = document.getElementById('filterRisk').value.toLowerCase();
+  const type = document.getElementById('filterType').value;
+  const review = document.getElementById('filterReview').value;
+  const filtered = softwareData.filter(sw => {
+    const matchSearch = !search || sw.name.toLowerCase().includes(search) || sw.vendor.toLowerCase().includes(search);
+    const matchStatus = !status || sw.status === status;
+    const matchRisk = !risk || sw.risk === risk;
+    const matchType = !type || sw.type === type;
+    const matchReview = !review || sw.reviewStatus === review;
+    return matchSearch && matchStatus && matchRisk && matchType && matchReview;
+  });
+  renderTable(filtered);
+}
+
+// ── TABS ──
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+  // update sidebar active state
+  const sidebarItems = document.querySelectorAll('.sidebar-item');
+  sidebarItems.forEach(i => i.classList.remove('active'));
+}
+
+function showTab(t) {
+  const map = {approved:'tab-approved',restricted:'tab-restricted',prohibited:'tab-prohibited',requests:'tab-requests',log:'tab-log'};
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabIdx = {approved:0,restricted:1,prohibited:2,requests:3,log:4};
+  tabBtns.forEach(b => b.classList.remove('active'));
+  tabBtns[tabIdx[t]]?.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(map[t]).classList.add('active');
+}
+
+// ── MODAL ──
+function openModal(type, sw) {
+  const overlay = document.getElementById('modalOverlay');
+  const body = document.getElementById('modalBody');
+  const title = document.getElementById('modalTitle');
+  const sub = document.getElementById('modalSub');
+
+  if (type === 'add') {
+    title.textContent = 'Add New Software';
+    sub.textContent = 'Submit a new software entry for security review';
+    body.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        ${field('Software Name','text','')}
+        ${field('Version','text','')}
+        ${field('Vendor','text','')}
+        ${selectField('Software Type',['SaaS','On-Premise','Open Source','Commercial'])}
+        ${selectField('Category',['Productivity','Security','Dev Tools','Infrastructure','Other'])}
+        ${selectField('Risk Level',['Low','Medium','High'])}
+        ${field('Business Owner','text','')}
+        ${field('Technical Owner','text','')}
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="modal-field-label">Business Justification</label>
+        <textarea style="width:100%;height:80px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--sans);font-size:13px;resize:vertical;color:var(--text-primary);background:var(--bg)" placeholder="Describe the business need for this software…"></textarea>
+      </div>
+    `;
+  } else if (sw) {
+    title.textContent = sw.name;
+    sub.textContent = `${sw.id} — ${sw.vendor}`;
+    body.innerHTML = `
+      <div class="modal-section">
+        <div class="modal-section-title">Software Overview</div>
+        <div class="modal-grid">
+          <div><div class="modal-field-label">Software Name</div><div class="modal-field-value">${sw.name}</div></div>
+          <div><div class="modal-field-label">Version</div><div class="modal-field-value mono">${sw.version}</div></div>
+          <div><div class="modal-field-label">Vendor</div><div class="modal-field-value">${sw.vendor}</div></div>
+          <div><div class="modal-field-label">Software Type</div><div class="modal-field-value">${sw.type}</div></div>
+          <div><div class="modal-field-label">Category</div><div class="modal-field-value">${sw.category}</div></div>
+          <div><div class="modal-field-label">Status</div><div class="modal-field-value">${statusBadge(sw.status)}</div></div>
+          <div><div class="modal-field-label">Business Owner</div><div class="modal-field-value">${sw.bizOwner}</div></div>
+          <div><div class="modal-field-label">Technical Owner</div><div class="modal-field-value">${sw.techOwner}</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Security & Access Details</div>
+        <div class="modal-grid">
+          <div><div class="modal-field-label">Data Classification Accessed</div><div class="modal-field-value">${sw.dataClass}</div></div>
+          <div><div class="modal-field-label">Privilege Requirement</div><div class="modal-field-value">${sw.privilege}</div></div>
+          <div><div class="modal-field-label">Internet Access Required</div><div class="modal-field-value">${sw.internet}</div></div>
+          <div><div class="modal-field-label">Network Behavior</div><div class="modal-field-value mono" style="font-size:11px">${sw.network}</div></div>
+          <div><div class="modal-field-label">Patching Method</div><div class="modal-field-value">${sw.patching}</div></div>
+          <div><div class="modal-field-label">Vulnerability Status</div><div class="modal-field-value">${sw.vulnStatus}</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Vendor Risk</div>
+        <div class="modal-grid">
+          <div><div class="modal-field-label">Vendor Risk Assessment</div><div class="modal-field-value">${sw.vendorRisk}</div></div>
+          <div><div class="modal-field-label">Vendor Security Status</div><div class="modal-field-value">${sw.vendorSecurity}</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Approval & Review</div>
+        <div class="modal-grid">
+          <div><div class="modal-field-label">Approval Authority</div><div class="modal-field-value">${sw.approvalAuth}</div></div>
+          <div><div class="modal-field-label">Approval Date</div><div class="modal-field-value mono">${sw.approvalDate}</div></div>
+          <div><div class="modal-field-label">Last Review Date</div><div class="modal-field-value mono" style="${sw.reviewStatus==='Overdue'?'color:#dc2626;font-weight:500':''}">${sw.lastReview}${sw.reviewStatus==='Overdue'?' ⚠ Overdue':''}</div></div>
+          <div><div class="modal-field-label">Review Frequency</div><div class="modal-field-value">${sw.reviewFreq}</div></div>
+          <div><div class="modal-field-label">Security Review Status</div><div class="modal-field-value">${reviewBadge(sw.reviewStatus)}</div></div>
+          <div><div class="modal-field-label">Risk Level</div><div class="modal-field-value">${riskBadge(sw.risk)}</div></div>
+          <div><div class="modal-field-label">Exception Required</div><div class="modal-field-value">${sw.exception}</div></div>
+          <div><div class="modal-field-label">Exception ID</div><div class="modal-field-value mono">${sw.exceptionId}</div></div>
+        </div>
+      </div>
+      <div class="modal-section" style="margin-bottom:0">
+        <div class="modal-section-title">Notes</div>
+        <div class="modal-field-value notes">${sw.notes}</div>
+      </div>
+    `;
+  }
+  overlay.classList.add('open');
+}
+
+function field(label, type, val) {
+  return `<div>
+    <label class="modal-field-label">${label}</label>
+    <input type="${type}" value="${val}" style="width:100%;padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--sans);color:var(--text-primary);background:var(--bg);outline:none" placeholder="${label}…">
+  </div>`;
+}
+function selectField(label, opts) {
+  return `<div>
+    <label class="modal-field-label">${label}</label>
+    <select style="width:100%;padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--sans);color:var(--text-primary);background:var(--bg);outline:none">
+      <option value="">Select…</option>${opts.map(o=>`<option>${o}</option>`).join('')}
+    </select>
+  </div>`;
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+function exportList() {
+  alert('Export initiated — generating CSV report for Approved Software List…\n\nIn a production system, this would download a formatted report.');
+}
+
+// Init — load live from SharePoint
+loadFromSharePoint();
+</script>
+</body>
+</html>
