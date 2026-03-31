@@ -923,26 +923,28 @@ function detectChanges(oldEntry, newEntry) {
   });
   return Object.keys(changes).length > 0 ? changes : null;
 }
-// ── SHAREPOINT JSON BACKEND ──
-// Reads and writes to a JSON file in Site Assets.
-// Falls back to localStorage if running locally or SharePoint isn't available.
+// ── AIRTABLE BACKEND ──
+// Token is stored securely in localStorage — never hardcoded.
+// First time setup screen prompts for token and Base ID.
 
-const SP_SITE        = 'https://idemiapublicsecurity.sharepoint.com/sites/CybersecurityTeam';
-const SP_ASSETS      = `${SP_SITE}/SiteAssets`;
-const DATA_FILE      = 'grc-software-data.json';
-const LOG_FILE_SP    = 'grc-software-log.json';
-const DATA_URL       = `${SP_ASSETS}/${DATA_FILE}`;
-const LOG_URL_SP     = `${SP_ASSETS}/${LOG_FILE_SP}`;
-const STORAGE_KEY    = 'grc_software_list_v1';
+const AIRTABLE_BASE_ID  = 'app2ixFektg9M512q';
+const STORAGE_KEY       = 'grc_software_list_v1';
+const AT_TOKEN_KEY      = 'grc_airtable_token';
+const AT_TABLE_SOFTWARE = 'Software List';
+const AT_TABLE_REQUESTS = 'Software Requests';
+const AT_TABLE_LOG      = 'Activity Log';
 
 let softwareData = [];
 let editingId    = null;
-let useSharePoint = false;
+let airtableToken = null;
 
-// Detect if we are running from SharePoint
-function detectSharePoint() {
-  return window.location.href.includes('sharepoint.com') ||
-         window.location.href.includes('idemiapublicsecurity');
+function getToken() {
+  return localStorage.getItem(AT_TOKEN_KEY) || null;
+}
+
+function saveToken(token) {
+  localStorage.setItem(AT_TOKEN_KEY, token);
+  airtableToken = token;
 }
 
 function generateId() {
@@ -952,125 +954,240 @@ function generateId() {
   return `SW-${String(next).padStart(3,'0')}`;
 }
 
-// ── GET SHAREPOINT REQUEST DIGEST (needed for write operations) ──
-async function getRequestDigest() {
-  const res = await fetch(`${SP_SITE}/_api/contextinfo`, {
-    method: 'POST',
-    headers: { 'Accept': 'application/json;odata=nometadata' },
-    credentials: 'include'
-  });
+// ── AIRTABLE API HELPERS ──
+function atHeaders() {
+  return {
+    'Authorization': `Bearer ${airtableToken}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+function atUrl(table, params='') {
+  return `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}${params}`;
+}
+
+async function atGet(table) {
+  const res = await fetch(atUrl(table, '?pageSize=100'), { headers: atHeaders() });
+  if (!res.ok) throw new Error(`Airtable read failed: ${res.status}`);
   const json = await res.json();
-  return json.FormDigestValue;
+  return json.records || [];
 }
 
-// ── WRITE FILE TO SHAREPOINT ──
-async function writeFileToSharePoint(filename, content) {
-  const digest = await getRequestDigest();
-  const url = `${SP_SITE}/_api/web/GetFolderByServerRelativeUrl('sites/CybersecurityTeam/SiteAssets')/Files/Add(url='${filename}',overwrite=true)`;
-  const res = await fetch(url, {
+async function atCreate(table, fields) {
+  const res = await fetch(atUrl(table), {
     method: 'POST',
-    headers: {
-      'Accept': 'application/json;odata=nometadata',
-      'X-RequestDigest': digest,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(content),
-    credentials: 'include'
+    headers: atHeaders(),
+    body: JSON.stringify({ fields })
   });
-  if (!res.ok) throw new Error(`Write failed: ${res.status}`);
+  if (!res.ok) throw new Error(`Airtable create failed: ${res.status}`);
+  return await res.json();
 }
 
-// ── READ FILE FROM SHAREPOINT ──
-async function readFileFromSharePoint(url) {
-  const res = await fetch(url + '?t=' + Date.now(), {
-    headers: { 'Accept': 'application/json' },
-    credentials: 'include'
+async function atUpdate(table, recordId, fields) {
+  const res = await fetch(atUrl(table, `/${recordId}`), {
+    method: 'PATCH',
+    headers: atHeaders(),
+    body: JSON.stringify({ fields })
   });
-  if (!res.ok) throw new Error(`Read failed: ${res.status}`);
+  if (!res.ok) throw new Error(`Airtable update failed: ${res.status}`);
   return await res.json();
+}
+
+async function atDelete(table, recordId) {
+  const res = await fetch(atUrl(table, `/${recordId}`), {
+    method: 'DELETE',
+    headers: atHeaders()
+  });
+  if (!res.ok) throw new Error(`Airtable delete failed: ${res.status}`);
+}
+
+// ── MAP AIRTABLE RECORD TO INTERNAL FORMAT ──
+function mapRecord(rec) {
+  const f = rec.fields || {};
+  return {
+    _recordId:    rec.id,
+    id:           f['Software ID']          || `SW-${String(rec.id).slice(-3)}`,
+    name:         f['Software Name']        || '—',
+    version:      f['Version']              || '—',
+    vendor:       f['Vendor']               || '—',
+    type:         f['Software Type']        || '—',
+    category:     f['Category']             || '—',
+    bizOwner:     f['Business Owner']       || '—',
+    techOwner:    f['Technical Owner']      || '—',
+    reviewStatus: f['Review Status']        || 'Scheduled',
+    risk:         (f['Risk Level']          || 'low').toLowerCase(),
+    approvalDate: f['Approval Date']        || '—',
+    lastReview:   f['Last Review Date']     || '—',
+    status:       (f['Status']              || 'pending review').toLowerCase(),
+    notes:        f['Notes']                || '—',
+    dataClass:    f['Data Classification']  || '—',
+    privilege:    f['Privilege Requirement']|| '—',
+    internet:     f['Internet Access']      || '—',
+    network:      f['Network Behavior']     || '—',
+    patching:     f['Patching Method']      || '—',
+    vulnStatus:   f['Vulnerability Status'] || '—',
+    vendorRisk:   f['Vendor Risk Assessment']|| '—',
+    vendorSecurity: f['Vendor Security Status'] || '—',
+    approvalAuth: f['Approval Authority']   || '—',
+    reviewFreq:   f['Review Frequency']     || '—',
+    exception:    f['Exception Required']   || 'No',
+    exceptionId:  f['Exception ID']         || '—',
+    externalContact: f['External Contact']  || '—',
+  };
+}
+
+// ── MAP INTERNAL FORMAT TO AIRTABLE FIELDS ──
+function toFields(entry) {
+  return {
+    'Software ID':           entry.id,
+    'Software Name':         entry.name,
+    'Version':               entry.version,
+    'Vendor':                entry.vendor,
+    'Software Type':         entry.type,
+    'Category':              entry.category,
+    'Business Owner':        entry.bizOwner,
+    'Technical Owner':       entry.techOwner,
+    'Review Status':         entry.reviewStatus,
+    'Risk Level':            entry.risk,
+    'Approval Date':         entry.approvalDate !== '—' ? entry.approvalDate : null,
+    'Last Review Date':      entry.lastReview   !== '—' ? entry.lastReview   : null,
+    'Status':                entry.status,
+    'Notes':                 entry.notes,
+    'Data Classification':   entry.dataClass,
+    'Privilege Requirement': entry.privilege,
+    'Internet Access':       entry.internet,
+    'Network Behavior':      entry.network,
+    'Patching Method':       entry.patching,
+    'Vulnerability Status':  entry.vulnStatus,
+    'Vendor Risk Assessment':entry.vendorRisk,
+    'Vendor Security Status':entry.vendorSecurity,
+    'Approval Authority':    entry.approvalAuth,
+    'Review Frequency':      entry.reviewFreq,
+    'Exception Required':    entry.exception,
+    'Exception ID':          entry.exceptionId,
+    'External Contact':      entry.externalContact,
+  };
 }
 
 // ── SAVE DATA ──
 async function saveData() {
-  // Always save to localStorage as backup
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(softwareData)); } catch(e) {}
-  // If on SharePoint, also write to JSON file
-  if (useSharePoint) {
-    try {
-      await writeFileToSharePoint(DATA_FILE, softwareData);
-    } catch(e) {
-      console.warn('SharePoint write failed, data saved locally only:', e.message);
-      showSyncStatus('warning');
-    }
-  }
 }
 
 // ── SAVE LOG ──
 async function saveLog() {
   try { localStorage.setItem(LOG_KEY, JSON.stringify(activityLog)); } catch(e) {}
-  if (useSharePoint) {
+  // Also log to Airtable if connected
+  if (airtableToken && activityLog.length > 0) {
     try {
-      await writeFileToSharePoint(LOG_FILE_SP, activityLog);
-    } catch(e) {
-      console.warn('SharePoint log write failed:', e.message);
-    }
+      const latest = activityLog[0];
+      await atCreate(AT_TABLE_LOG, {
+        'Action': latest.type,
+        'Software Name': latest.softwareName,
+        'Details': latest.details,
+        'Timestamp': latest.timestamp
+      });
+    } catch(e) { console.warn('Airtable log write failed:', e.message); }
   }
 }
 
-// ── LOAD DATA ──
+// ── LOAD DATA FROM AIRTABLE ──
 async function loadData() {
-  useSharePoint = detectSharePoint();
-  if (useSharePoint) {
-    try {
-      softwareData = await readFileFromSharePoint(DATA_URL);
-      showSyncStatus('synced');
-      return;
-    } catch(e) {
-      // File doesn't exist yet or network error — fall back to localStorage
-      console.warn('SharePoint read failed, using localStorage:', e.message);
-      useSharePoint = false;
-    }
+  airtableToken = getToken();
+  if (!airtableToken) {
+    showSetupScreen();
+    return;
   }
-  // localStorage fallback
+  showSyncStatus('saving');
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) { softwareData = JSON.parse(stored); return; }
-  } catch(e) {}
-  softwareData = [];
+    const records = await atGet(AT_TABLE_SOFTWARE);
+    softwareData = records.map(mapRecord);
+    // Also cache locally
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(softwareData)); } catch(e) {}
+    showSyncStatus('synced');
+  } catch(e) {
+    console.warn('Airtable load failed, using localStorage:', e.message);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) softwareData = JSON.parse(stored);
+    } catch(e2) { softwareData = []; }
+    showSyncStatus('local');
+  }
 }
 
 // ── LOAD LOG ──
 async function loadLog() {
-  if (useSharePoint) {
-    try {
-      activityLog = await readFileFromSharePoint(LOG_URL_SP);
-      return;
-    } catch(e) {
-      console.warn('SharePoint log read failed:', e.message);
-    }
-  }
   try {
     const stored = localStorage.getItem(LOG_KEY);
     if (stored) activityLog = JSON.parse(stored);
   } catch(e) { activityLog = []; }
 }
 
-// ── SYNC STATUS INDICATOR ──
+// ── SYNC STATUS ──
 function showSyncStatus(state) {
   const el = document.getElementById('syncStatus');
   if (!el) return;
-  if (state === 'synced') {
-    el.textContent = '● Synced';
-    el.style.color = '#057a55';
-  } else if (state === 'saving') {
-    el.textContent = '↻ Saving…';
-    el.style.color = '#d97706';
-  } else if (state === 'warning') {
-    el.textContent = '⚠ Saved locally only';
-    el.style.color = '#d97706';
-  } else if (state === 'local') {
-    el.textContent = '● Local only';
-    el.style.color = '#8c93a8';
+  const states = {
+    synced:  { text: '● Synced with Airtable', color: '#057a55' },
+    saving:  { text: '↻ Syncing…',             color: '#d97706' },
+    warning: { text: '⚠ Saved locally only',   color: '#d97706' },
+    local:   { text: '● Local only',            color: '#8c93a8' }
+  };
+  const s = states[state] || states.local;
+  el.textContent = s.text;
+  el.style.color = s.color;
+}
+
+// ── FIRST-TIME SETUP SCREEN ──
+function showSetupScreen() {
+  const overlay = document.getElementById('modalOverlay');
+  const title   = document.getElementById('modalTitle');
+  const sub     = document.getElementById('modalSub');
+  const body    = document.getElementById('modalBody');
+  const footer  = document.getElementById('modalFooter');
+  title.textContent = 'Connect to Airtable';
+  sub.textContent   = 'One-time setup — your token is stored privately on this device';
+  body.innerHTML = `
+    <div class="modal-section">
+      <div class="modal-section-title">Airtable Personal Access Token</div>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6">
+        Enter your Airtable Personal Access Token below. It will be stored privately in your browser and never shared. You only need to do this once per device.
+      </p>
+      <div style="margin-bottom:16px">
+        <label class="modal-field-label">Personal Access Token</label>
+        <input type="password" id="atTokenInput" placeholder="patrXXXXXXXXXXXXXX.XXXXXXX…"
+          style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--mono);color:var(--text-primary);background:var(--bg);outline:none">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Get this from airtable.com/create/tokens</div>
+      </div>
+      <div style="background:var(--accent-light);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--accent)">
+        Your token is stored only on this device in your browser's local storage. It is never sent to any server other than Airtable directly.
+      </div>
+    </div>`;
+  footer.innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="connectAirtable()">Connect</button>`;
+  overlay.classList.add('open');
+}
+
+async function connectAirtable() {
+  const token = document.getElementById('atTokenInput')?.value?.trim();
+  if (!token) { alert('Please enter your Airtable token.'); return; }
+  saveToken(token);
+  closeModal();
+  showSyncStatus('saving');
+  try {
+    const records = await atGet(AT_TABLE_SOFTWARE);
+    softwareData = records.map(mapRecord);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(softwareData)); } catch(e) {}
+    showSyncStatus('synced');
+    updateSummaryCards(softwareData);
+    updateCharts(softwareData);
+    renderTable(softwareData);
+    renderLog();
+  } catch(e) {
+    alert('Could not connect to Airtable. Please check your token and try again.\n\n' + e.message);
+    showSyncStatus('local');
+    localStorage.removeItem(AT_TOKEN_KEY);
   }
 }
 
@@ -1176,9 +1293,15 @@ async function deleteSoftware(id) {
   const sw = softwareData.find(s => s.id === id);
   softwareData = softwareData.filter(s => s.id !== id);
   if (sw) addLogEntry('deleted', sw.name, sw.id, `Entry permanently deleted from the software list`);
-  showSyncStatus('saving');
+  // Delete from Airtable
+  if (airtableToken && sw?._recordId) {
+    showSyncStatus('saving');
+    try {
+      await atDelete(AT_TABLE_SOFTWARE, sw._recordId);
+      showSyncStatus('synced');
+    } catch(e) { console.warn('Airtable delete failed:', e.message); showSyncStatus('warning'); }
+  }
   await saveData();
-  showSyncStatus(useSharePoint ? 'synced' : 'local');
   updateSummaryCards(softwareData);
   updateCharts(softwareData);
   filterTable();
@@ -1216,11 +1339,14 @@ async function saveSoftwareEntry(e) {
     reviewFreq:   get('reviewFreq'),
     exception:    get('exception'),
     exceptionId:  get('exceptionId'),
+    externalContact: get('externalContact'),
   };
   if (editingId) {
     const idx = softwareData.findIndex(s => s.id === editingId);
     if (idx > -1) {
       const oldEntry = {...softwareData[idx]};
+      const recordId = oldEntry._recordId;
+      entry._recordId = recordId;
       softwareData[idx] = entry;
       const changes = detectChanges(oldEntry, entry);
       if (changes && changes['Status']) {
@@ -1231,15 +1357,31 @@ async function saveSoftwareEntry(e) {
         addLogEntry('edited', entry.name, entry.id,
           `${changeCount} field${changeCount !== 1 ? 's' : ''} updated`, changes);
       }
+      // Update in Airtable
+      if (airtableToken && recordId) {
+        showSyncStatus('saving');
+        try {
+          await atUpdate(AT_TABLE_SOFTWARE, recordId, toFields(entry));
+          showSyncStatus('synced');
+        } catch(e) { console.warn('Airtable update failed:', e.message); showSyncStatus('warning'); }
+      }
     }
   } else {
     softwareData.unshift(entry);
     addLogEntry('added', entry.name, entry.id,
       `Added as ${entry.status||'pending'} · Risk: ${entry.risk||'unclassified'} · Category: ${entry.category||'—'}`);
+    // Create in Airtable
+    if (airtableToken) {
+      showSyncStatus('saving');
+      try {
+        const rec = await atCreate(AT_TABLE_SOFTWARE, toFields(entry));
+        entry._recordId = rec.id;
+        softwareData[0]._recordId = rec.id;
+        showSyncStatus('synced');
+      } catch(e) { console.warn('Airtable create failed:', e.message); showSyncStatus('warning'); }
+    }
   }
-  showSyncStatus('saving');
   await saveData();
-  showSyncStatus(useSharePoint ? 'synced' : 'local');
   updateSummaryCards(softwareData);
   updateCharts(softwareData);
   filterTable();
@@ -1260,7 +1402,7 @@ async function clearAllData() {
   showSyncStatus('saving');
   await saveData();
   await saveLog();
-  showSyncStatus(useSharePoint ? 'synced' : 'local');
+  showSyncStatus('local');
   updateSummaryCards(softwareData);
   updateCharts(softwareData);
   renderTable(softwareData);
@@ -1593,6 +1735,7 @@ function openModal(type, sw) {
             ${fs('Review Frequency','reviewFreq',['Annual','Semi-Annual','Quarterly'],v.reviewFreq)}
             ${fs('Exception Required','exception',['No','Yes'],v.exception)}
             ${fi('Exception ID','exceptionId',v.exceptionId,'text')}
+            ${fi('External Contact','externalContact',v.externalContact,'text')}
           </div>
         </div>
         <div class="modal-section" style="margin-bottom:0">
@@ -1653,6 +1796,7 @@ function openModal(type, sw) {
           <div><div class="modal-field-label">Risk Level</div><div class="modal-field-value">${riskBadge(sw.risk)}</div></div>
           <div><div class="modal-field-label">Exception Required</div><div class="modal-field-value">${sw.exception}</div></div>
           <div><div class="modal-field-label">Exception ID</div><div class="modal-field-value mono">${sw.exceptionId}</div></div>
+          <div><div class="modal-field-label">External Contact</div><div class="modal-field-value">${sw.externalContact||'—'}</div></div>
         </div>
       </div>
       <div class="modal-section" style="margin-bottom:0">
