@@ -1038,34 +1038,35 @@ function mapRecord(rec) {
 
 // ── MAP INTERNAL FORMAT TO AIRTABLE FIELDS ──
 function toFields(entry) {
+  const clean = (v) => (!v || v === '—') ? null : v;
   return {
-    'Software ID':           entry.id,
-    'Software Name':         entry.name,
-    'Version':               entry.version,
-    'Vendor':                entry.vendor,
-    'Software Type':         entry.type,
-    'Category':              entry.category,
-    'Business Owner':        entry.bizOwner,
-    'Technical Owner':       entry.techOwner,
-    'Review Status':         entry.reviewStatus,
-    'Risk Level':            entry.risk,
-    'Approval Date':         entry.approvalDate !== '—' ? entry.approvalDate : null,
-    'Last Review Date':      entry.lastReview   !== '—' ? entry.lastReview   : null,
-    'Status':                entry.status,
-    'Notes':                 entry.notes,
-    'Data Classification':   entry.dataClass,
-    'Privilege Requirement': entry.privilege,
-    'Internet Access':       entry.internet,
-    'Network Behavior':      entry.network,
-    'Patching Method':       entry.patching,
-    'Vulnerability Status':  entry.vulnStatus,
-    'Vendor Risk Assessment':entry.vendorRisk,
-    'Vendor Security Status':entry.vendorSecurity,
-    'Approval Authority':    entry.approvalAuth,
-    'Review Frequency':      entry.reviewFreq,
-    'Exception Required':    entry.exception,
-    'Exception ID':          entry.exceptionId,
-    'External Contact':      entry.externalContact,
+    'Software ID':           clean(entry.id),
+    'Software Name':         clean(entry.name),
+    'Version':               clean(entry.version),
+    'Vendor':                clean(entry.vendor),
+    'Software Type':         clean(entry.type),
+    'Category':              clean(entry.category),
+    'Business Owner':        clean(entry.bizOwner),
+    'Technical Owner':       clean(entry.techOwner),
+    'External Contact':      clean(entry.externalContact),
+    'Review Status':         clean(entry.reviewStatus),
+    'Risk Level':            clean(entry.risk),
+    'Approval Date':         clean(entry.approvalDate),
+    'Last Review Date':      clean(entry.lastReview),
+    'Status':                clean(entry.status),
+    'Notes':                 clean(entry.notes),
+    'Data Classification':   clean(entry.dataClass),
+    'Privilege Requirement': clean(entry.privilege),
+    'Internet Access':       clean(entry.internet),
+    'Network Behavior':      clean(entry.network),
+    'Patching Method':       clean(entry.patching),
+    'Vulnerability Status':  clean(entry.vulnStatus),
+    'Vendor Risk Assessment':clean(entry.vendorRisk),
+    'Vendor Security Status':clean(entry.vendorSecurity),
+    'Approval Authority':    clean(entry.approvalAuth),
+    'Review Frequency':      clean(entry.reviewFreq),
+    'Exception Required':    clean(entry.exception),
+    'Exception ID':          clean(entry.exceptionId),
   };
 }
 
@@ -1082,10 +1083,10 @@ async function saveLog() {
     try {
       const latest = activityLog[0];
       await atCreate(AT_TABLE_LOG, {
-        'Action': latest.type,
-        'Software Name': latest.softwareName,
-        'Details': latest.details,
-        'Timestamp': latest.timestamp
+        'Action': latest.type || null,
+        'Software Name': latest.softwareName || null,
+        'Details': latest.details || null,
+        'Timestamp': latest.timestamp || null
       });
     } catch(e) { console.warn('Airtable log write failed:', e.message); }
   }
@@ -2237,12 +2238,12 @@ function openRiskSummary() {
   overlay.classList.add('open');
 }
 
-// Init — load data (SharePoint if available, localStorage fallback)
+// Init — load data (Airtable if token available, localStorage fallback)
 (async () => {
   showSyncStatus('saving');
   await loadData();
   await loadLog();
-  showSyncStatus(useSharePoint ? 'synced' : 'local');
+  showSyncStatus(airtableToken ? 'synced' : 'local');
   updateSummaryCards(softwareData);
   updateCharts(softwareData);
   renderTable(softwareData);
