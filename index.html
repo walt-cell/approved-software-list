@@ -429,7 +429,7 @@
   <div class="header-right">
     <span class="header-badge">v2.4.1</span>
     <span class="header-badge" id="syncStatus" style="transition:color 0.3s">● Local only</span>
-    <div class="header-user" title="J. Rivera — Security Analyst">JR</div>
+    <button onclick="resetAirtableToken()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;font-family:var(--sans)" title="Reconnect to Airtable">⟳ Reconnect</button>
   </div>
 </header>
 
@@ -1167,6 +1167,13 @@ function showSetupScreen() {
     <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
     <button class="btn btn-primary" onclick="connectAirtable()">Connect</button>`;
   overlay.classList.add('open');
+}
+
+function resetAirtableToken() {
+  localStorage.removeItem(AT_TOKEN_KEY);
+  airtableToken = null;
+  showSyncStatus('local');
+  showSetupScreen();
 }
 
 async function connectAirtable() {
