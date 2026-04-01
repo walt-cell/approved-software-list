@@ -707,17 +707,18 @@
   <!-- ====== TAB: REQUESTS ====== -->
   <div id="tab-requests" class="tab-content">
     <div class="table-section">
-      <div class="table-toolbar" style="justify-content:flex-end;">
-        <button class="btn btn-primary" onclick="openModal('add')">
+      <div class="table-toolbar">
+        <span style="font-size:13px;color:var(--text-secondary);font-weight:500;">Software Requests</span>
+        <button class="btn btn-primary" style="margin-left:auto" onclick="openRequestModal()">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
           Submit Request
         </button>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Req-ID</th><th>Software Name</th><th>Requester</th><th>Department</th><th>Business Justification</th><th>Submitted</th><th>Review Status</th></tr></thead>
-          <tbody>
-            <tr><td colspan="7" style="text-align:center;padding:40px;">
+          <thead><tr><th>REQ-ID</th><th>Software Name</th><th>Requester</th><th>Department</th><th>Business Justification</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="requestsTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;">
               <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
                 <div style="font-size:13px;font-weight:500;color:var(--text-secondary)">No pending software requests</div>
                 <div style="font-size:12px;color:var(--text-muted)">Click <strong>Submit Request</strong> to raise a new software request</div>
@@ -726,6 +727,48 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- ====== REQUEST MODAL ====== -->
+  <div class="modal-overlay" id="requestModalOverlay" onclick="closeRequestModal(event)">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width:560px">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Submit Software Request</div>
+          <div class="modal-sub">Request a new software to be reviewed and approved</div>
+        </div>
+        <button class="modal-close" onclick="closeRequestModal()">✕</button>
+      </div>
+      <form id="requestForm" onsubmit="submitRequest(event)">
+        <div class="modal-body">
+          <div class="modal-section">
+            <div class="modal-section-title">Request Details</div>
+            <div class="modal-grid">
+              <div class="modal-field">
+                <label class="modal-field-label">Software Name *</label>
+                <input class="modal-input" name="reqSoftwareName" placeholder="e.g. Slack, Zoom, Adobe..." required>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Requester Name *</label>
+                <input class="modal-input" name="reqRequesterName" placeholder="Your full name" required>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Department *</label>
+                <input class="modal-input" name="reqDepartment" placeholder="e.g. Cybersecurity, IT, HR..." required>
+              </div>
+              <div class="modal-field" style="grid-column:1/-1">
+                <label class="modal-field-label">Business Justification *</label>
+                <textarea class="modal-input" name="reqJustification" rows="4" placeholder="Explain why this software is needed and how it will be used..." required style="resize:vertical"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeRequestModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -789,7 +832,121 @@
 </div>
 
 <script>
-// ── ACTIVITY LOG ENGINE ──
+// ── SOFTWARE REQUESTS ──
+let requestsData = [];
+
+function generateReqId() {
+  const nums = requestsData.map(r => parseInt((r.reqId||'REQ-000').replace('REQ-',''))).filter(n => !isNaN(n));
+  const next = nums.length ? Math.max(...nums) + 1 : 1;
+  return `REQ-${String(next).padStart(3,'0')}`;
+}
+
+function openRequestModal() {
+  document.getElementById('requestModalOverlay').classList.add('open');
+  document.getElementById('requestForm').reset();
+}
+
+function closeRequestModal(e) {
+  if (e && e.target !== document.getElementById('requestModalOverlay')) return;
+  document.getElementById('requestModalOverlay').classList.remove('open');
+}
+
+async function submitRequest(e) {
+  e.preventDefault();
+  const f = document.getElementById('requestForm');
+  const get = name => f.querySelector(`[name="${name}"]`)?.value?.trim() || '';
+  const now = new Date();
+  const request = {
+    reqId: generateReqId(),
+    softwareName: get('reqSoftwareName'),
+    requesterName: get('reqRequesterName'),
+    department: get('reqDepartment'),
+    justification: get('reqJustification'),
+    status: 'Pending Review',
+    submittedDate: now.toISOString().slice(0,10),
+    displayDate: now.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+  };
+  requestsData.unshift(request);
+  try { localStorage.setItem('grc_requests_v1', JSON.stringify(requestsData)); } catch(e) {}
+
+  // Save to Airtable
+  if (airtableToken) {
+    try {
+      await atCreate(AT_TABLE_REQUESTS, {
+        'Software Name': request.softwareName,
+        'Requester Name': request.requesterName,
+        'Department': request.department,
+        'Business Justification': request.justification,
+        'Request Status': request.status,
+        'Submitted Date': request.submittedDate
+      });
+    } catch(err) { console.warn('Airtable request write failed:', err.message); }
+  }
+
+  addLogEntry('added', request.softwareName, request.reqId, `Software request submitted by ${request.requesterName} (${request.department})`);
+  closeRequestModal();
+  renderRequests();
+  updateSummaryCards(softwareData);
+}
+
+async function updateRequestStatus(reqId, newStatus) {
+  const idx = requestsData.findIndex(r => r.reqId === reqId);
+  if (idx > -1) {
+    requestsData[idx].status = newStatus;
+    try { localStorage.setItem('grc_requests_v1', JSON.stringify(requestsData)); } catch(e) {}
+    renderRequests();
+    updateSummaryCards(softwareData);
+  }
+}
+
+function loadRequests() {
+  try {
+    const stored = localStorage.getItem('grc_requests_v1');
+    if (stored) requestsData = JSON.parse(stored);
+  } catch(e) { requestsData = []; }
+}
+
+function renderRequests() {
+  const tbody = document.getElementById('requestsTableBody');
+  if (!tbody) return;
+  const countEl = document.getElementById('tab-count-requests');
+  const navEl = document.getElementById('nav-count-requests');
+  if (countEl) countEl.textContent = requestsData.length;
+  if (navEl) navEl.textContent = requestsData.length;
+
+  if (requestsData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="font-size:13px;font-weight:500;color:var(--text-secondary)">No pending software requests</div>
+        <div style="font-size:12px;color:var(--text-muted)">Click <strong>Submit Request</strong> to raise a new software request</div>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  const statusColor = (s) => {
+    const map = { 'Pending Review':'#5b21b6:#ede9fe', 'Approved':'#057a55:#def7ec', 'Rejected':'#9b1c1c:#fde8e8' };
+    const [color, bg] = (map[s] || '#374151:#f3f4f6').split(':');
+    return `background:${bg};color:${color}`;
+  };
+
+  tbody.innerHTML = requestsData.map(r => `
+    <tr>
+      <td style="padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--text-muted)">${r.reqId}</td>
+      <td style="padding:10px 12px;font-weight:500;font-size:13px">${r.softwareName}</td>
+      <td style="padding:10px 12px;font-size:12px;color:var(--text-secondary)">${r.requesterName}</td>
+      <td style="padding:10px 12px;font-size:12px;color:var(--text-secondary)">${r.department}</td>
+      <td style="padding:10px 12px;font-size:12px;color:var(--text-secondary);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.justification}">${r.justification}</td>
+      <td style="padding:10px 12px;font-size:11px;font-family:var(--mono);color:var(--text-muted)">${r.displayDate||r.submittedDate}</td>
+      <td style="padding:10px 12px"><span style="${statusColor(r.status)};padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600">${r.status}</span></td>
+      <td style="padding:10px 12px;display:flex;gap:8px">
+        ${r.status === 'Pending Review' ? `
+          <button onclick="updateRequestStatus('${r.reqId}','Approved')" class="btn btn-secondary btn-sm" style="font-size:11px;color:#057a55">Approve</button>
+          <button onclick="updateRequestStatus('${r.reqId}','Rejected')" class="btn btn-secondary btn-sm" style="font-size:11px;color:#dc2626">Reject</button>
+        ` : '—'}
+      </td>
+    </tr>`).join('');
+}
 const LOG_KEY = 'grc_activity_log_v1';
 let activityLog = [];
 
@@ -1078,7 +1235,7 @@ async function saveData() {
 // ── SAVE LOG ──
 async function saveLog() {
   try { localStorage.setItem(LOG_KEY, JSON.stringify(activityLog)); } catch(e) {}
-  // Also log to Airtable if connected
+  // Write latest entry to Airtable Activity Log
   if (airtableToken && activityLog.length > 0) {
     try {
       const latest = activityLog[0];
@@ -1103,16 +1260,16 @@ async function loadData() {
   try {
     const records = await atGet(AT_TABLE_SOFTWARE);
     softwareData = records.map(mapRecord);
-    // Also cache locally
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(softwareData)); } catch(e) {}
     showSyncStatus('synced');
   } catch(e) {
+    // Never delete token on failure — just fall back to localStorage
     console.warn('Airtable load failed, using localStorage:', e.message);
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) softwareData = JSON.parse(stored);
     } catch(e2) { softwareData = []; }
-    showSyncStatus('local');
+    showSyncStatus('warning');
   }
 }
 
@@ -1181,6 +1338,7 @@ async function connectAirtable() {
   const token = document.getElementById('atTokenInput')?.value?.trim();
   if (!token) { alert('Please enter your Airtable token.'); return; }
   saveToken(token);
+  airtableToken = token;
   closeModal();
   showSyncStatus('saving');
   try {
@@ -1193,9 +1351,19 @@ async function connectAirtable() {
     renderTable(softwareData);
     renderLog();
   } catch(e) {
-    alert('Could not connect to Airtable. Please check your token and try again.\n\n' + e.message);
-    showSyncStatus('local');
-    localStorage.removeItem(AT_TOKEN_KEY);
+    // Keep the token even if connection fails — don't delete it
+    console.warn('Airtable connection failed:', e.message);
+    showSyncStatus('warning');
+    // Load from localStorage instead
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) softwareData = JSON.parse(stored);
+    } catch(e2) { softwareData = []; }
+    updateSummaryCards(softwareData);
+    updateCharts(softwareData);
+    renderTable(softwareData);
+    renderLog();
+    alert('Connected but could not load data. Check your token has access to IDEMIA GRC Portal base.\n\n' + e.message);
   }
 }
 
@@ -2243,11 +2411,13 @@ function openRiskSummary() {
   showSyncStatus('saving');
   await loadData();
   await loadLog();
+  loadRequests();
   showSyncStatus(airtableToken ? 'synced' : 'local');
   updateSummaryCards(softwareData);
   updateCharts(softwareData);
   renderTable(softwareData);
   renderLog();
+  renderRequests();
 })();
 </script>
 </body>
