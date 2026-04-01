@@ -732,41 +732,96 @@
 
   <!-- ====== REQUEST MODAL ====== -->
   <div class="modal-overlay" id="requestModalOverlay" onclick="closeRequestModal(event)">
-    <div class="modal" onclick="event.stopPropagation()" style="max-width:560px">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width:640px">
       <div class="modal-header">
         <div>
           <div class="modal-title">Submit Software Request</div>
-          <div class="modal-sub">Request a new software to be reviewed and approved</div>
+          <div class="modal-sub">Complete the form below — your request will be reviewed by the Cybersecurity Team</div>
         </div>
         <button class="modal-close" onclick="closeRequestModal()">✕</button>
       </div>
       <form id="requestForm" onsubmit="submitRequest(event)">
-        <div class="modal-body">
+        <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+
           <div class="modal-section">
-            <div class="modal-section-title">Request Details</div>
+            <div class="modal-section-title">Requester Information</div>
             <div class="modal-grid">
               <div class="modal-field">
-                <label class="modal-field-label">Software Name *</label>
-                <input class="modal-input" name="reqSoftwareName" placeholder="e.g. Slack, Zoom, Adobe..." required>
-              </div>
-              <div class="modal-field">
-                <label class="modal-field-label">Requester Name *</label>
-                <input class="modal-input" name="reqRequesterName" placeholder="Your full name" required>
+                <label class="modal-field-label">Your Full Name *</label>
+                <input class="modal-input" name="reqRequesterName" placeholder="e.g. John Smith" required>
               </div>
               <div class="modal-field">
                 <label class="modal-field-label">Department *</label>
-                <input class="modal-input" name="reqDepartment" placeholder="e.g. Cybersecurity, IT, HR..." required>
-              </div>
-              <div class="modal-field" style="grid-column:1/-1">
-                <label class="modal-field-label">Business Justification *</label>
-                <textarea class="modal-input" name="reqJustification" rows="4" placeholder="Explain why this software is needed and how it will be used..." required style="resize:vertical"></textarea>
+                <input class="modal-input" name="reqDepartment" placeholder="e.g. Cybersecurity, IT, HR, Finance..." required>
               </div>
             </div>
           </div>
+
+          <div class="modal-section">
+            <div class="modal-section-title">Software Details</div>
+            <div class="modal-grid">
+              <div class="modal-field">
+                <label class="modal-field-label">Software Name *</label>
+                <input class="modal-input" name="reqSoftwareName" placeholder="e.g. Slack, Zoom, Adobe Acrobat..." required>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Vendor / Publisher</label>
+                <input class="modal-input" name="reqVendor" placeholder="e.g. Salesforce, Microsoft, Google...">
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Software Type</label>
+                <select class="modal-input" name="reqType">
+                  <option value="">Select type...</option>
+                  <option>SaaS</option>
+                  <option>Desktop Application</option>
+                  <option>Mobile Application</option>
+                  <option>Browser Extension</option>
+                  <option>Open Source</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Estimated Users</label>
+                <select class="modal-input" name="reqUsers">
+                  <option value="">Select range...</option>
+                  <option>Just me</option>
+                  <option>2–5 people</option>
+                  <option>6–20 people</option>
+                  <option>20+ people</option>
+                  <option>Entire organisation</option>
+                </select>
+              </div>
+              <div class="modal-field" style="grid-column:1/-1">
+                <label class="modal-field-label">Business Justification *</label>
+                <textarea class="modal-input" name="reqJustification" rows="4" placeholder="Explain why this software is needed, what problem it solves, and how it will be used day to day..." required style="resize:vertical;line-height:1.6"></textarea>
+              </div>
+              <div class="modal-field" style="grid-column:1/-1">
+                <label class="modal-field-label">Will this software handle sensitive or confidential data?</label>
+                <select class="modal-input" name="reqSensitiveData">
+                  <option value="">Select...</option>
+                  <option>No — general productivity use only</option>
+                  <option>Yes — internal data</option>
+                  <option>Yes — PII or personal data</option>
+                  <option>Yes — confidential / restricted data</option>
+                  <option>Unsure</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <div style="background:var(--accent-light);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--accent);line-height:1.6">
+              <strong>What happens next?</strong> Your request will be logged with a REQ-ID and reviewed by the Cybersecurity Team. You'll be notified of the outcome. Approved requests are automatically added to the Software Inventory for full security review.
+            </div>
+          </div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" onclick="closeRequestModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Submit Request</button>
+          <button type="submit" class="btn btn-primary">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M10 4v12M4 10h12"/></svg>
+            Submit Request
+          </button>
         </div>
       </form>
     </div>
@@ -859,6 +914,10 @@ async function submitRequest(e) {
   const request = {
     reqId: generateReqId(),
     softwareName: get('reqSoftwareName'),
+    vendor: get('reqVendor'),
+    type: get('reqType'),
+    estimatedUsers: get('reqUsers'),
+    sensitiveData: get('reqSensitiveData'),
     requesterName: get('reqRequesterName'),
     department: get('reqDepartment'),
     justification: get('reqJustification'),
@@ -873,12 +932,12 @@ async function submitRequest(e) {
   if (airtableToken) {
     try {
       await atCreate(AT_TABLE_REQUESTS, {
-        'Software Name': request.softwareName,
-        'Requester Name': request.requesterName,
-        'Department': request.department,
-        'Business Justification': request.justification,
-        'Request Status': request.status,
-        'Submitted Date': request.submittedDate
+        'Software Name': request.softwareName || null,
+        'Requester Name': request.requesterName || null,
+        'Department': request.department || null,
+        'Business Justification': request.justification || null,
+        'Request Status': request.status || null,
+        'Submitted Date': request.submittedDate || null
       });
     } catch(err) { console.warn('Airtable request write failed:', err.message); }
   }
@@ -891,12 +950,65 @@ async function submitRequest(e) {
 
 async function updateRequestStatus(reqId, newStatus) {
   const idx = requestsData.findIndex(r => r.reqId === reqId);
-  if (idx > -1) {
-    requestsData[idx].status = newStatus;
-    try { localStorage.setItem('grc_requests_v1', JSON.stringify(requestsData)); } catch(e) {}
-    renderRequests();
+  if (idx < 0) return;
+  const request = requestsData[idx];
+  request.status = newStatus;
+  try { localStorage.setItem('grc_requests_v1', JSON.stringify(requestsData)); } catch(e) {}
+
+  // If approved — promote to Software List
+  if (newStatus === 'Approved') {
+    const newEntry = {
+      id: generateId(),
+      name: request.softwareName || '—',
+      version: '—',
+      vendor: request.vendor || '—',
+      type: request.type || '—',
+      category: '—',
+      bizOwner: request.requesterName || '—',
+      techOwner: '—',
+      externalContact: '—',
+      reviewStatus: 'Scheduled',
+      risk: 'low',
+      approvalDate: '—',
+      lastReview: '—',
+      status: 'pending review',
+      notes: `Promoted from request ${reqId}. Business justification: ${request.justification}`,
+      dataClass: '—',
+      privilege: '—',
+      internet: '—',
+      network: '—',
+      patching: '—',
+      vulnStatus: '—',
+      vendorRisk: '—',
+      vendorSecurity: '—',
+      approvalAuth: '—',
+      reviewFreq: '—',
+      exception: 'No',
+      exceptionId: '—',
+    };
+    softwareData.unshift(newEntry);
+    await saveData();
+
+    // Create in Airtable Software List
+    if (airtableToken) {
+      try {
+        const rec = await atCreate(AT_TABLE_SOFTWARE, toFields(newEntry));
+        newEntry._recordId = rec.id;
+        softwareData[0]._recordId = rec.id;
+      } catch(err) { console.warn('Airtable promote failed:', err.message); }
+    }
+
+    addLogEntry('added', newEntry.name, newEntry.id,
+      `Promoted from request ${reqId} submitted by ${request.requesterName} — added to Software Inventory for review`);
     updateSummaryCards(softwareData);
+    updateCharts(softwareData);
+    filterTable();
+    alert(`✓ "${request.softwareName}" has been approved and added to the Software Inventory as SW-${newEntry.id} for full security review.`);
+  } else {
+    addLogEntry('status', request.softwareName, reqId, `Request ${reqId} ${newStatus.toLowerCase()} by security team`);
   }
+
+  renderRequests();
 }
 
 function loadRequests() {
